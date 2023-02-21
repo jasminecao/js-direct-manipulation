@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="node_modules/paper/dist/paper-full.js"></script>
+<style>
+  html,
+body {
+    height: 100%;
+}
+
+/* Scale canvas with resize attribute to full size */
+canvas[resize] {
+    width: 100%;
+    height: 100%;
+}
+</style>
+<script type="text/javascript">
+	paper.install(window);
+	var lineTool, circleTool, bubbleTool;
+  var thickness;
+  var path;
+
+  var paintColor = 'black';
+  const changeColor = (color) => {
+    paintColor = color;
+  }
+  const undo = () => {
+    path.removeSegments((path.segments).length - 1)
+  }
+
+  const toggleThickness = () => {
+    var value = document.getElementById('thick');
+    if (value.checked) {
+      thickness = 20;
+    } else {
+      thickness = 1;
+    }
+  }
+
+	window.onload = function() {
+		paper.setup('myCanvas');
+		lineTool = new Tool();
+    circleTool = new Tool();
+    bubbleTool = new Tool();
+
+		lineTool.onMouseDown = function(event) {
+			path = new Path();
+			path.strokeColor = paintColor;
+			path.add(event.point);
+      path.strokeWidth = thickness;
+		}
+
+		lineTool.onMouseDrag = function(event) {
+			path.add(event.point);
+      path.strokeWidth = thickness;
+		}
+
+    circleTool.onMouseUp = (event) => {
+      var circle = new Path.Circle({
+        center: event.middlePoint,
+        radius: event.delta.length / 2
+      });
+      circle.strokeColor = paintColor;
+      circle.fillColor = paintColor;
+    }
+
+    bubbleTool.onMouseDrag = (event) => {
+      var circle = new Path.Circle({
+        center: event.middlePoint,
+        radius: event.delta.length / 2
+      });
+      circle.strokeColor = paintColor;
+      circle.fillColor = paintColor;
+      path.add(circle);
+    }
+	}
+</script>
+</head>
+<body>
+  <a href="#" onclick="lineTool.activate();">Lines</a>
+  <input type="checkbox" id="thick" onclick="toggleThickness();" />
+  <label for="thick">Thicc</label>
+  <a href="#" onclick="circleTool.activate();">Circles</a>
+  <a href="#" onclick="bubbleTool.activate();">Bubbles</a>
+  <a href="#" onclick="undo()">Undo</a>
+  <input type="color" id="pen-color" onclick="changeColor(this.value);">
+	<canvas id="myCanvas" resize></canvas>
+</body>
+</html>
